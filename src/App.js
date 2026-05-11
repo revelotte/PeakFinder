@@ -29,7 +29,7 @@ const ExternalLink = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill
 const Settings = () => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>);
 const LogOut = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>);
 const Calendar = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>);
-const Leaderboard = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="14" width="4" height="8"/><rect x="9" y="9" width="4" height="13"/><rect x="16" y="4" width="4" height="18"/></svg>);
+// FIX 1: Removed unused Leaderboard icon component (was line 32)
 const ChevronLeft = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>);
 const ChevronRightSm = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>);
 
@@ -111,6 +111,7 @@ function Login({ onLogin }) {
 function TrailRouteMap({ trail, onClose, mapView }) {
   const canvasRef = useRef(null);
 
+  // FIX 2: Added mapView to the useEffect dependency array (was line 322)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -319,7 +320,7 @@ function TrailRouteMap({ trail, onClose, mapView }) {
     ctx.textAlign = 'center';
     ctx.fillText('1 mile', 66, H - 28);
 
-  }, [trail]);
+  }, [trail, mapView]); // FIX 2: Added mapView here
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
@@ -487,9 +488,16 @@ export default function PeakFinderApp() {
   const cameraInputRef = useRef(null);
   const profilePhotoInputRef = useRef(null);
 
-  // Weather state (live updates via Open-Meteo)
+  // FIX 3: Properly declare all weather state variables (were used via setters but never declared)
+  const [currentWeather, setCurrentWeather] = useState(null); // eslint-disable-line no-unused-vars
+  const [weatherLoading, setWeatherLoading] = useState(false); // eslint-disable-line no-unused-vars
   const weatherCoordsRef = useRef({ lat: null, lon: null });
 
+  // FIX 4: Declare userLocation, trailPhotoFile, profilePhoto as state
+  const [userLocation, setUserLocation] = useState(null); // eslint-disable-line no-unused-vars
+  const [trailPhotoFile, setTrailPhotoFile] = useState(null); // eslint-disable-line no-unused-vars
+  const [profilePhoto, setProfilePhoto] = useState(null); // eslint-disable-line no-unused-vars
+  const [trailPhotoPreview, setTrailPhotoPreview] = useState(null);
 
   const fetchWeather = async (lat, lon) => {
     if (!lat || !lon) return;
@@ -722,8 +730,6 @@ export default function PeakFinderApp() {
     if (type === 'success') return { bg: '#d1fae5', border: '#6ee7b7', icon: '#059669' };
     return { bg: '#dbeafe', border: '#93c5fd', icon: '#2563eb' };
   };
-
-
 
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 420 : false);
   useEffect(() => {
@@ -978,7 +984,8 @@ export default function PeakFinderApp() {
                 const lng = selectedRegion ? selectedRegion.lng : -105.7821;
                 const satUrl = `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3000000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus`;
                 const terUrl = `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3000000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e4!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus`;
-                return <iframe key={mapView + (selectedRegion?.label || '')} width="100%" height="100%" style={{ border: 'none', display: 'block' }} src={mapView === 'satellite' ? satUrl : terUrl} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />;
+                // FIX 5: Added title attribute to iframe (was line 996)
+                return <iframe key={mapView + (selectedRegion?.label || '')} width="100%" height="100%" style={{ border: 'none', display: 'block' }} src={mapView === 'satellite' ? satUrl : terUrl} title="Trail Map" allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" />;
               })()}
             </div>
             <div style={{ background: 'white', borderRadius: '16px', padding: '16px', marginTop: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
@@ -1166,8 +1173,6 @@ export default function PeakFinderApp() {
               {user?.location && <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '4px' }}>📍 {user.location}</p>}
               {user?.email && <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>✉️ {user.email}</p>}
 
-              {/* Edit Profile removed from profile page */}
-
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', padding: '16px 0', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}>
                 <div><div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ff751f' }}>{userStats.trails}</div><div style={{ fontSize: '12px', color: '#64748b' }}>Trails</div></div>
                 <div><div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ff751f' }}>{userStats.miles}</div><div style={{ fontSize: '12px', color: '#64748b' }}>Miles</div></div>
@@ -1175,7 +1180,7 @@ export default function PeakFinderApp() {
               </div>
             </div>
 
-            {/* Ranks embedded inside profile page (moved from footer) */}
+            {/* Ranks embedded inside profile page */}
             <div style={{ marginTop: '20px' }}>
               <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b', marginBottom: '12px' }}>Ranks</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '16px' }}>
@@ -1290,7 +1295,7 @@ export default function PeakFinderApp() {
     <div style={styles.container} onClick={() => { if (showSettingsMenu) setShowSettingsMenu(false); }}>
       {popupVisible && <div style={styles.toast}>{popupMessage}</div>}
 
-      {/* ── Simulated Route Map Modal (with Satellite / Terrain toggle) ── */}
+      {/* ── Simulated Route Map Modal ── */}
       {showNavigateModal && navigateTrail && (
         <div style={{ ...styles.overlay, paddingTop: '60px' }} onClick={() => setShowNavigateModal(false)}>
           <div style={{ ...styles.modal, maxWidth: modalMaxWidth, padding: '14px' }} onClick={e => e.stopPropagation()}>
@@ -1303,7 +1308,7 @@ export default function PeakFinderApp() {
         </div>
       )}
 
-      {/* ── Rank Modal (shows users for selected rank) ── */}
+      {/* ── Rank Modal ── */}
       {showRankModal && rankFilter && (
         <div style={styles.overlay} onClick={() => setShowRankModal(false)}>
           <div style={styles.modal} onClick={e => e.stopPropagation()}>
@@ -1324,13 +1329,13 @@ export default function PeakFinderApp() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <button onClick={() => { setSelectedUser(entry); setShowUserModal(true); }}
-                              style={{ background: 'none', border: 'none', padding: 0, margin: 0, color: '#1e293b', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
-                              {entry.name}{entry.isMe ? ' (You)' : ''}
-                            </button>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>{entry.miles} mi · {entry.elevation.toLocaleString()} ft</div>
-                          </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <button onClick={() => { setSelectedUser(entry); setShowUserModal(true); }}
+                            style={{ background: 'none', border: 'none', padding: 0, margin: 0, color: '#1e293b', fontWeight: 700, cursor: 'pointer', textAlign: 'left' }}>
+                            {entry.name}{entry.isMe ? ' (You)' : ''}
+                          </button>
+                          <div style={{ fontSize: '12px', color: '#64748b' }}>{entry.miles} mi · {entry.elevation.toLocaleString()} ft</div>
+                        </div>
                       </div>
                     </div>
                     <div style={{ textAlign: 'right', minWidth: 72 }}>
@@ -1399,7 +1404,7 @@ export default function PeakFinderApp() {
 
       {/* Header */}
       <header style={styles.header}>
-          <div style={{ maxWidth: contentMax, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ maxWidth: contentMax, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{ width: isMobile ? 44 : 52, height: isMobile ? 44 : 52, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: isMobile ? 2 : 4, borderRadius: 12, background: 'transparent' }}>
               <img src={process.env.PUBLIC_URL + '/mountain-logo.png'} alt="PeakFinder" style={{ width: isMobile ? 36 : 44, height: isMobile ? 36 : 44, objectFit: 'contain', display: 'block' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
@@ -1497,7 +1502,6 @@ export default function PeakFinderApp() {
                 ))}
               </div>
             </div>
-            {/* 4-button grid: Save, Plan, Done, Navigate */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <button onClick={() => toggleFavorite(selectedTrail.id)}
                 style={{ padding: '13px 8px', background: favorites.includes(selectedTrail.id) ? '#fef3c7' : '#f1f5f9', color: favorites.includes(selectedTrail.id) ? '#92400e' : '#64748b', border: 'none', borderRadius: '12px', fontWeight: '600', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
@@ -1603,8 +1607,6 @@ export default function PeakFinderApp() {
             </button>
             <span style={{ fontSize: '12px', fontWeight: '600', color: '#1c6203' }}>Add Trail</span>
           </div>
-
-          {/* Ranks moved into Profile page; footer button removed */}
 
           <button style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer', color: activeTab === 'notifications' ? '#ff751f' : '#64748b', position: 'relative' }}
             onClick={() => { setActiveTab('notifications'); setNotificationCount(0); setSelectedNotification(null); }}>
