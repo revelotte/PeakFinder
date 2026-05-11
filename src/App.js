@@ -471,12 +471,8 @@ export default function PeakFinderApp() {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [mapView, setMapView] = useState('satellite');
-  const [userLocation, setUserLocation] = useState(null);
   const [user, setUser] = useState(null);
   const [splashVisible, setSplashVisible] = useState(true);
-  const [trailPhotoPreview, setTrailPhotoPreview] = useState(null);
-  const [trailPhotoFile, setTrailPhotoFile] = useState(null);
-  const [profilePhoto, setProfilePhoto] = useState(null);
   const [showFilterRegion, setShowFilterRegion] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
@@ -492,19 +488,8 @@ export default function PeakFinderApp() {
   const profilePhotoInputRef = useRef(null);
 
   // Weather state (live updates via Open-Meteo)
-  const [currentWeather, setCurrentWeather] = useState(null);
-  const [weatherLoading, setWeatherLoading] = useState(false);
   const weatherCoordsRef = useRef({ lat: null, lon: null });
 
-  const weatherCodeToEmoji = (code) => {
-    if (code === 0) return '☀️';
-    if (code === 1 || code === 2 || code === 3) return '⛅';
-    if (code === 45 || code === 48) return '🌫️';
-    if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return '🌧️';
-    if ((code >= 71 && code <= 77) || (code >= 85 && code <= 86)) return '❄️';
-    if (code >= 95) return '⛈️';
-    return '🌤️';
-  };
 
   const fetchWeather = async (lat, lon) => {
     if (!lat || !lon) return;
@@ -552,7 +537,7 @@ export default function PeakFinderApp() {
     update();
     const id = setInterval(() => { if (mounted) update(); }, 10 * 60 * 1000);
     return () => { mounted = false; clearInterval(id); };
-  }, []);
+  }, [mapView]);
 
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'Weather Alert', message: 'Storm expected in Rocky Mountains tomorrow.', detail: 'A significant storm system is moving into the Rocky Mountain region. Expected snowfall of 6–12 inches above 10,000 ft. High winds up to 45 mph. Trail closures may be in effect.', time: '2 hours ago', type: 'warning' },
@@ -589,7 +574,7 @@ export default function PeakFinderApp() {
   useEffect(() => {
     const t = setTimeout(() => setSplashVisible(false), 1500);
     return () => clearTimeout(t);
-  }, []);
+  }, [mapView]);
 
   useEffect(() => {
     setPopupVisible(false);
@@ -599,7 +584,7 @@ export default function PeakFinderApp() {
     window.addEventListener('pointerdown', mark, true);
     window.addEventListener('keydown', mark, true);
     return () => { window.removeEventListener('pointerdown', mark, true); window.removeEventListener('keydown', mark, true); };
-  }, []);
+  }, [mapView]);
 
   const showToast = (msg) => {
     if (!userInteractedRef.current) return;
@@ -745,7 +730,7 @@ export default function PeakFinderApp() {
     const onResize = () => setIsMobile(window.innerWidth <= 420);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
-  }, []);
+  }, [mapView]);
 
   const contentMax = isMobile ? '420px' : '1100px';
   const modalMaxWidth = isMobile ? '92%' : '900px';
