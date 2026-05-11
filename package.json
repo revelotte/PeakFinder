@@ -22,15 +22,16 @@
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
-  "extends": [
-    "react-app",
-    "react-app/jest"
-  ],
-  "rules": {
-    "no-unused-vars": "warn",
-    "react-hooks/exhaustive-deps": "warn"
-  }
-}
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "rules": {
+      "no-unused-vars": "warn",
+      "react-hooks/exhaustive-deps": "warn",
+      "jsx-a11y/iframe-has-title": "warn"
+    }
+  },
   "browserslist": {
     "production": [
       ">0.2%",
